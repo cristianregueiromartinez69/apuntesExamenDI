@@ -21,8 +21,7 @@ class FiestraPrincipal(Gtk.Window):
         #consulta numeros de albarán
         lista_numeros = self.base.consultaSenParametros("SELECT DISTINCT numeroAlbaran FROM detalleVentas")
 
-        #numero auxiliar albaran pulsado
-        self.aux_numero_albaran = None
+
 
         #label del albarán
         self.label_albara = Gtk.Label(label = "Albará")
@@ -59,6 +58,10 @@ class FiestraPrincipal(Gtk.Window):
         self.comboBox_numero_albarans = Gtk.ComboBox()
         self.comboBox_numero_albarans.set_active(0)
         self.comboBox_numero_albarans.set_model(self.modelo_combobox_numero_albarans)
+
+        #numero auxiliar albaran
+        punteiro = self.comboBox_numero_albarans.get_active()
+        self.aux_numero_albaran = self.modelo_combobox_numero_albarans[punteiro][0]
 
         #hacemos una celda para la representacion de datos
         self.celda_textos_numero_albarans_combo = Gtk.CellRendererText()
@@ -100,17 +103,53 @@ class FiestraPrincipal(Gtk.Window):
         self.caja_horizontal_textos_edited.pack_start(self.txt_editar, True, True, 0)
         self.caja_horizontal_textos_edited.pack_start(self.txt_borrar, True, True, 0)
 
+        #tabla
+        self.modelo_datos_tabla = Gtk.ListStore(int, str, int, float)
+
+        # consulta tabla numero albaran
+        consulta_tabla = self.base.consultaConParametros(
+            "SELECT d.codigoProduto as codigo_produto, p.nomeProduto as nombre_producto, d.cantidade as cantidad_producto, d.prezoUnitario as precio_unitaario from detalleVentas d LEFT JOIN produtos p on p.codigoProduto = d.codigoProduto WHERE numeroAlbaran = ?",
+            self.aux_numero_albaran)
+
+        for consulta in consulta_tabla:
+            self.modelo_datos_tabla.append([int(consulta[0]), consulta[1], int(consulta[2]), float(consulta[3])])
+
+        self.view_tabla = Gtk.TreeView(model = self.modelo_datos_tabla)
+
+        #celdas de la tabla
+        self.celda_codigo_producto = Gtk.CellRendererText()
+        self.columna_codigo_producto = Gtk.TreeViewColumn("Codigo Producto", self.celda_codigo_producto, text = 0)
+        self.view_tabla.append_column(self.columna_codigo_producto)
+
+        self.celda_nome_produto = Gtk.CellRendererText()
+        self.columna_nome_produto = Gtk.TreeViewColumn("Nome Producto", self.celda_nome_produto, text=1)
+        self.view_tabla.append_column(self.columna_nome_produto)
+
+        self.celda_cantidade_producto = Gtk.CellRendererText()
+        self.columna_cantidade_producto = Gtk.TreeViewColumn("Cantidade", self.celda_cantidade_producto, text=2)
+        self.view_tabla.append_column(self.columna_cantidade_producto)
+
+        self.celda_prezo_producto = Gtk.CellRendererText()
+        self.columa_prezo_produto = Gtk.TreeViewColumn("Prezo Unitario", self.celda_prezo_producto, text=3)
+        self.view_tabla.append_column(self.columa_prezo_produto)
+
+
+
+
         #conexiones
         self.comboBox_numero_albarans.connect("changed", self.on_combo_edited)
         self.button_insertar.connect("clicked", self.on_boton_insertar)
         self.button_editar.connect("clicked", self.on_boton_editar)
         self.button_borrar.connect("clicked", self.on_boton_borrar)
 
+
+
         #añadiendo cosas al layout vertical
         self.cajaVertical.pack_start(self.label_albara, True, True, 0)
         self.cajaVertical.pack_start(self.grid, True, True, 0)
         self.cajaVertical.pack_start(self.caja_horizontal_botones, True, True, 0)
         self.cajaVertical.pack_start(self.caja_horizontal_textos_edited, True, True, 0)
+        self.cajaVertical.pack_start(self.view_tabla, True, True, 0)
 
 
         self.add(self.cajaVertical)
@@ -137,6 +176,12 @@ class FiestraPrincipal(Gtk.Window):
             consulta = self.base.consultaConParametros("select v.numeroAlbara as numero_albaran, v.numeroCliente as numero_cliente, c.nomeCliente as nombre_cliente, v.dataAlbara as data_albaran, v.dataEntrega as data_entrega, c.apelidosCliente as apellidos_cliente from ventas v LEFT JOIN clientes c  on c.numeroCliente = v.numeroCliente WHERE v.numeroAlbara = ?", numero)
 
             self.establecer_valores_textos(consulta[0][1], consulta[0][2], consulta[0][3], consulta[0][4], consulta[0][5])
+
+            consulta_tabla = self.base.consultaConParametros("SELECT d.codigoProduto as codigo_produto, p.nomeProduto as nombre_producto, d.cantidade as cantidad_producto, d.prezoUnitario as precio_unitaario from detalleVentas d LEFT JOIN produtos p on p.codigoProduto = d.codigoProduto WHERE numeroAlbaran = ?", numero)
+
+            self.modelo_datos_tabla.clear()
+            for consulta in consulta_tabla:
+                self.modelo_datos_tabla.append([int(consulta[0]), consulta[1], int(consulta[2]), float(consulta[3])])
 
     '''
     Metodo para establecer los valores de los textos para la consulta
@@ -168,3 +213,12 @@ if __name__ == "__main__":
     Gtk.main()
 
 
+'''
+SELECT d.codigoProduto as codigo_produto,
+p.nomeProduto as nombre_producto,
+d.cantidade as cantidad_producto,
+d.prezoUnitario as precio_unitaario
+from detalleVentas d LEFT JOIN produtos p
+on p.codigoProduto = d.codigoProduto
+WHERE numeroAlbaran = ?
+'''
