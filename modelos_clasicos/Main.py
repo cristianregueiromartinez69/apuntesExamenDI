@@ -94,14 +94,17 @@ class FiestraPrincipal(Gtk.Window):
 
         #textos añadir, actualizar, borrar
         self.caja_horizontal_textos_edited = Gtk.Box(orientation = Gtk.Orientation.HORIZONTAL, spacing=10)
-        self.txt_insertar = Gtk.Entry()
-        self.txt_insertar.set_sensitive(False)
-        self.txt_editar = Gtk.Entry()
-        self.txt_borrar = Gtk.Entry()
+        self.txt_codigo_produto = Gtk.Entry()
+        self.txt_codigo_produto.set_placeholder_text("Codigo de producto aquí...")
+        self.txt_nome_produto = Gtk.Entry()
+        self.txt_nome_produto.set_placeholder_text("Cantidad del producto aquí...")
+        self.txt_cantidade_produto = Gtk.Entry()
+        self.txt_cantidade_produto.set_placeholder_text("Cantidad del producto aquí...")
 
-        self.caja_horizontal_textos_edited.pack_start(self.txt_insertar, True, True, 0)
-        self.caja_horizontal_textos_edited.pack_start(self.txt_editar, True, True, 0)
-        self.caja_horizontal_textos_edited.pack_start(self.txt_borrar, True, True, 0)
+
+        self.caja_horizontal_textos_edited.pack_start(self.txt_codigo_produto, True, True, 0)
+        self.caja_horizontal_textos_edited.pack_start(self.txt_nome_produto, True, True, 0)
+        self.caja_horizontal_textos_edited.pack_start(self.txt_cantidade_produto, True, True, 0)
 
         #tabla
         self.modelo_datos_tabla = Gtk.ListStore(int, str, int, float)
@@ -133,7 +136,13 @@ class FiestraPrincipal(Gtk.Window):
         self.columa_prezo_produto = Gtk.TreeViewColumn("Prezo Unitario", self.celda_prezo_producto, text=3)
         self.view_tabla.append_column(self.columa_prezo_produto)
 
+        #botones de aceptar y cerrar
+        self.boton_cancelar = Gtk.Button(label = "Cancelar")
+        self.boton_aceptar = Gtk.Button(label = "Aceptar")
 
+        self.caja_horizontal_botones_aceptar_cancelar = Gtk.Box(orientation = Gtk.Orientation.HORIZONTAL, spacing=10)
+        self.caja_horizontal_botones_aceptar_cancelar.pack_start(self.boton_cancelar, True, True, 0)
+        self.caja_horizontal_botones_aceptar_cancelar.pack_start(self.boton_aceptar, True, True, 0)
 
 
         #conexiones
@@ -141,7 +150,8 @@ class FiestraPrincipal(Gtk.Window):
         self.button_insertar.connect("clicked", self.on_boton_insertar)
         self.button_editar.connect("clicked", self.on_boton_editar)
         self.button_borrar.connect("clicked", self.on_boton_borrar)
-
+        self.boton_cancelar.connect("clicked", self.on_button_cancelar)
+        self.boton_aceptar.connect("clicked", self.on_boton_aceptar)
 
 
         #añadiendo cosas al layout vertical
@@ -150,6 +160,7 @@ class FiestraPrincipal(Gtk.Window):
         self.cajaVertical.pack_start(self.caja_horizontal_botones, True, True, 0)
         self.cajaVertical.pack_start(self.caja_horizontal_textos_edited, True, True, 0)
         self.cajaVertical.pack_start(self.view_tabla, True, True, 0)
+        self.cajaVertical.pack_start(self.caja_horizontal_botones_aceptar_cancelar, True, True, 0)
 
 
         self.add(self.cajaVertical)
@@ -157,9 +168,9 @@ class FiestraPrincipal(Gtk.Window):
         self.show_all()
 
         #ponemos inicialmente los textos invisibles
-        self.txt_insertar.set_visible(False)
-        self.txt_editar.set_visible(False)
-        self.txt_borrar.set_visible(False)
+        self.txt_codigo_produto.set_visible(False)
+        self.txt_nome_produto.set_visible(False)
+        self.txt_cantidade_produto.set_visible(False)
 
 
     '''
@@ -195,6 +206,7 @@ class FiestraPrincipal(Gtk.Window):
 
     def on_boton_insertar(self, boton):
         self.ocultar_mostrar_textos(True)
+        self.desactivar_botones_edicion(False)
 
     def on_boton_editar(self, boton):
         pass
@@ -202,10 +214,28 @@ class FiestraPrincipal(Gtk.Window):
     def on_boton_borrar(self, boton):
         pass
 
+    def on_button_cancelar(self, boton):
+        self.desactivar_botones_edicion(True)
+        self.ocultar_mostrar_textos(False)
+        self.limpiar_campos()
+
+    def on_boton_aceptar(self, boton):
+        pass
+
     def ocultar_mostrar_textos(self, condicion):
-        self.txt_insertar.set_visible(condicion)
-        self.txt_editar.set_visible(condicion)
-        self.txt_borrar.set_visible(condicion)
+        self.txt_codigo_produto.set_visible(condicion)
+        self.txt_nome_produto.set_visible(condicion)
+        self.txt_cantidade_produto.set_visible(condicion)
+
+    def desactivar_botones_edicion(self, estado):
+        self.button_insertar.set_sensitive(estado)
+        self.button_editar.set_sensitive(estado)
+        self.button_borrar.set_sensitive(estado)
+
+    def limpiar_campos(self):
+        self.txt_codigo_produto.set_text("")
+        self.txt_nome_produto.set_text("")
+        self.txt_cantidade_produto.set_text("")
 
 if __name__ == "__main__":
     window = FiestraPrincipal()
