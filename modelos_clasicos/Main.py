@@ -9,7 +9,7 @@ class FiestraPrincipal(Gtk.Window):
 
         self.set_title("Ejercicio modelos clasicos")
         self.set_resizable(False)
-        self.set_size_request(550,500)
+        self.set_size_request(550,300)
 
         self.cajaVertical = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
 
@@ -79,17 +79,49 @@ class FiestraPrincipal(Gtk.Window):
         self.grid.attach_next_to(self.label_apelidos, self.label_data_entrega, Gtk.PositionType.BOTTOM, 1, 1)
         self.grid.attach_next_to(self.txt_apelidos, self.label_apelidos, Gtk.PositionType.RIGHT, 1, 1)
 
+        #botones de insercion, update y delete
+        self.caja_horizontal_botones = Gtk.Box(orientation = Gtk.Orientation.HORIZONTAL, spacing=10)
+        self.button_insertar = Gtk.Button(label="Engadir")
+        self.button_editar = Gtk.Button(label="Editar")
+        self.button_borrar = Gtk.Button(label="Borrar")
+
+        self.caja_horizontal_botones.pack_start(self.button_insertar, True, True, 0)
+        self.caja_horizontal_botones.pack_start(self.button_editar, True, True, 0)
+        self.caja_horizontal_botones.pack_start(self.button_borrar, True, True, 0)
+
+        #textos añadir, actualizar, borrar
+        self.caja_horizontal_textos_edited = Gtk.Box(orientation = Gtk.Orientation.HORIZONTAL, spacing=10)
+        self.txt_insertar = Gtk.Entry()
+        self.txt_insertar.set_sensitive(False)
+        self.txt_editar = Gtk.Entry()
+        self.txt_borrar = Gtk.Entry()
+
+        self.caja_horizontal_textos_edited.pack_start(self.txt_insertar, True, True, 0)
+        self.caja_horizontal_textos_edited.pack_start(self.txt_editar, True, True, 0)
+        self.caja_horizontal_textos_edited.pack_start(self.txt_borrar, True, True, 0)
+
         #conexiones
         self.comboBox_numero_albarans.connect("changed", self.on_combo_edited)
+        self.button_insertar.connect("clicked", self.on_boton_insertar)
+        self.button_editar.connect("clicked", self.on_boton_editar)
+        self.button_borrar.connect("clicked", self.on_boton_borrar)
 
         #añadiendo cosas al layout vertical
         self.cajaVertical.pack_start(self.label_albara, True, True, 0)
         self.cajaVertical.pack_start(self.grid, True, True, 0)
+        self.cajaVertical.pack_start(self.caja_horizontal_botones, True, True, 0)
+        self.cajaVertical.pack_start(self.caja_horizontal_textos_edited, True, True, 0)
 
 
         self.add(self.cajaVertical)
 
         self.show_all()
+
+        #ponemos inicialmente los textos invisibles
+        self.txt_insertar.set_visible(False)
+        self.txt_editar.set_visible(False)
+        self.txt_borrar.set_visible(False)
+
 
     '''
     Metodo para obtener el numero pulsado en el comboBox
@@ -116,20 +148,23 @@ class FiestraPrincipal(Gtk.Window):
         self.txt_data_entrega.set_text(str(txt_data_entregam))
         self.txt_apelidos.set_text(str(txt_apelidos))
 
+    def on_boton_insertar(self, boton):
+        self.ocultar_mostrar_textos(True)
+
+    def on_boton_editar(self, boton):
+        pass
+
+    def on_boton_borrar(self, boton):
+        pass
+
+    def ocultar_mostrar_textos(self, condicion):
+        self.txt_insertar.set_visible(condicion)
+        self.txt_editar.set_visible(condicion)
+        self.txt_borrar.set_visible(condicion)
+
 if __name__ == "__main__":
     window = FiestraPrincipal()
     window.connect("destroy", Gtk.main_quit)
     Gtk.main()
 
 
-'''
-select v.numeroAlbara as numero_albaran,
-v.numeroCliente as numero_cliente,
-c.nomeCliente as nombre_cliente,
-v.dataAlbara as data_albaran,
-v.dataEntrega as data_entrega,
-c.apelidosCliente as apellidos_cliente
-from ventas v LEFT JOIN clientes c 
-on c.numeroCliente = v.numeroCliente 
-WHERE v.numeroAlbara = 3
-'''
